@@ -1,0 +1,86 @@
+:root {
+  /* Primary (Purple) */
+  --primary-purple-50: #f5f3ff;
+  --primary-purple-100: #ede9fe;
+  --primary-purple-200: #ddd6fe;
+  --primary-purple-300: #c4b5fd;
+  --primary-purple-400: #a78bfa;
+  --primary-purple-500: #8b5cf6;
+  --primary-purple-600: #7c3aed;
+  --primary-purple-700: #6d28d9;
+  --primary-purple-800: #5b21b6;
+  --primary-purple-900: #4c1d95;
+
+  /* Background */
+  --bg-dark-navy: #0f0d1e;
+  --bg-dark-purple: #1a1528;
+  --bg-dark-purple-lighter: #1e1432;
+  --bg-surface-dark: rgba(30, 20, 50, 0.4);
+  --bg-surface-darker: rgba(20, 15, 35, 0.6);
+  --bg-overlay: rgba(60, 40, 80, 0.08);
+  --bg-overlay-medium: rgba(60, 40, 80, 0.12);
+  --bg-overlay-strong: rgba(60, 40, 80, 0.25);
+
+  /* Accent */
+  --accent-purple-bg: rgba(168, 96, 240, 0.4);
+  --accent-purple-border: rgba(168, 96, 240, 0.3);
+  --accent-purple-hover: rgba(168, 96, 240, 0.5);
+
+  /* Text */
+  --text-primary-light: #faf7fd;
+  --text-secondary-light: #b8aecc;
+  --text-tertiary: #9a8fb0;
+  --text-muted: #6e6682;
+  --text-disabled: #544a62;
+
+  /* Border */
+  --border-subtle: rgba(60, 40, 80, 0.15);
+  --border-medium: rgba(60, 40, 80, 0.3);
+  --border-strong: rgba(60, 40, 80, 0.5);
+
+  /* Status - Success */
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+
+  /* Status - Error */
+  --error-400: #f87171;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+
+  /* Status - Warning */
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+
+  /* Status - Info */
+  --info-400: #60a5fa;
+  --info-500: #3b82f6;
+  --info-600: #2563eb;
+
+  /* Crypto */
+  --crypto-btc: #f7931a;
+  --crypto-eth: #627eea;
+  --crypto-usdt: #26a17b;
+  --crypto-bnb: #f3ba2f;
+  --crypto-sol: #14f195;
+  --crypto-xrp: #23292f;
+  --crypto-ada: #0033ad;
+  --crypto-doge: #c2a633;
+
+  /* Performance */
+  --performance-positive: #10b981;
+  --performance-negative: #ef4444;
+  --performance-neutral: #6b7280;
+
+  /* Chart */
+  --chart-1: #f54900;
+  --chart-2: #009689;
+  --chart-3: #104e64;
+  --chart-4: #ffb900;
+  --chart-5: #fe9a00;
+  --chart-6: #ec4899;
+  --chart-7: #14b8a6;
+  --chart-8: #f97316;
+}
+
