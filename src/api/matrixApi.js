@@ -20,7 +20,8 @@ function getRecords(axisConfig) {
   cachedRecords = generateMockRecords(
     parameterSpecs,
     allKeys.length ? allKeys : ['MACD.fast', 'MACD.slow', 'BB.time', 'BB.devUp'],
-    6000
+    400000,
+    true
   )
   cacheAxisKey = key
   return cachedRecords

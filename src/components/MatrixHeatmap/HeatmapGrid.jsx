@@ -21,6 +21,7 @@ export function HeatmapGrid({
   cells,
   aggregator,
   onCellClick,
+  canDrillDown = true,
   node,
   xAxisLabel,
   yAxisLabel,
@@ -105,7 +106,7 @@ export function HeatmapGrid({
   }, [yRanges, yParamOrder, yValuesMap])
 
   return (
-    <div className="heatmap-wrap">
+    <div className={`heatmap-wrap${canDrillDown ? '' : ' heatmap-max-level'}`}>
       <div className="heatmap-layout">
         <div className="heatmap-corner">
           <div className="heatmap-axis-title heatmap-axis-title-y">

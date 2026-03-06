@@ -22,10 +22,11 @@ function buildOrderedValues(spec) {
 }
 
 /**
- * Generate mock records for all combinations of a small subset of params (for demo).
- * In production these would come from API.
+ * Generate mock records for a subset of params (for demo).
+ * When allowDuplicates is true, the same param combination can appear multiple times with different scores,
+ * so L1/L2 drill-down nodes get more data.
  */
-export function generateMockRecords(specs, paramKeys, count = 8000) {
+export function generateMockRecords(specs, paramKeys, count = 25000, allowDuplicates = true) {
   const valuesByKey = {}
   for (const key of paramKeys) {
     const spec = specs.find((s) => s.key === key)
@@ -33,9 +34,9 @@ export function generateMockRecords(specs, paramKeys, count = 8000) {
   }
   const keys = Object.keys(valuesByKey)
   const records = []
-  const seen = new Set()
+  const seen = allowDuplicates ? null : new Set()
   let attempts = 0
-  const maxAttempts = count * 3
+  const maxAttempts = count * (allowDuplicates ? 1 : 3)
   while (records.length < count && attempts < maxAttempts) {
     attempts++
     const params = {}
@@ -46,8 +47,8 @@ export function generateMockRecords(specs, paramKeys, count = 8000) {
       params[k] = arr[idx]
       hash += `${idx},`
     }
-    if (seen.has(hash)) continue
-    seen.add(hash)
+    if (seen && seen.has(hash)) continue
+    if (seen) seen.add(hash)
     const score = 0.5 + Math.random() * 0.5
     records.push({ id: records.length + 1, params, score })
   }

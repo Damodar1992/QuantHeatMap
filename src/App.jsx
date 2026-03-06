@@ -1,3 +1,4 @@
+import { Button } from '@radix-ui/themes'
 import { MatrixHeatmap } from './components/MatrixHeatmap'
 
 function App() {
@@ -8,9 +9,9 @@ function App() {
           <div className="brand-pill">Q</div>
           <span className="brand-title">QuantSandbox</span>
           <nav className="top-nav">
-            <button type="button" className="nav-pill nav-pill-active">
+            <Button variant="soft" highContrast className="nav-pill nav-pill-active" size="2">
               Matrix Heatmap
-            </button>
+            </Button>
           </nav>
         </div>
       </header>

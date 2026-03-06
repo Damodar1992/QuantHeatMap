@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
+import { Select, Button } from '@radix-ui/themes'
 
 const AGGREGATORS = [
   { value: 'MIN', label: 'Min score' },
@@ -15,14 +16,25 @@ export function AxisConfig({
   aggregator,
   onAxisChange,
 }) {
+  const [addXValue, setAddXValue] = useState(undefined)
+  const [addYValue, setAddYValue] = useState(undefined)
   const xSelected = useMemo(() => new Set(xParams), [xParams])
   const ySelected = useMemo(() => new Set(yParams), [yParams])
+  const xAvailable = useMemo(
+    () => specs.filter((s) => !xSelected.has(s.key) && !ySelected.has(s.key)),
+    [specs, xSelected, ySelected]
+  )
+  const yAvailable = useMemo(
+    () => specs.filter((s) => !ySelected.has(s.key) && !xSelected.has(s.key)),
+    [specs, xSelected, ySelected]
+  )
 
   const addX = (key) => {
     if (ySelected.has(key)) return
     const next = [...xParamOrder]
     if (!next.includes(key)) next.push(key)
     onAxisChange({ xParamOrder: next, yParamOrder })
+    setAddXValue(undefined)
   }
   const removeX = (key) => {
     onAxisChange({
@@ -35,6 +47,7 @@ export function AxisConfig({
     const next = [...yParamOrder]
     if (!next.includes(key)) next.push(key)
     onAxisChange({ xParamOrder, yParamOrder: next })
+    setAddYValue(undefined)
   }
   const removeY = (key) => {
     onAxisChange({
@@ -53,33 +66,30 @@ export function AxisConfig({
             {xParamOrder.map((key) => (
               <span key={key} className="axis-tag">
                 {specs.find((s) => s.key === key)?.label || key}
-                <button type="button" className="axis-tag-remove" onClick={() => removeX(key)} aria-label="Remove">
+                <Button type="button" variant="ghost" color="gray" size="1" className="axis-tag-remove" onClick={() => removeX(key)} aria-label="Remove">
                   ×
-                </button>
+                </Button>
               </span>
             ))}
           </div>
-          <select
-            className="axis-select"
-            value=""
-            onChange={(e) => {
-              const k = e.target.value
-              if (k) addX(k)
-              e.target.value = ''
+          <Select.Root
+            value={addXValue ?? '__add__'}
+            onValueChange={(k) => {
+              if (k && k !== '__add__') addX(k)
+              setAddXValue(undefined)
             }}
+            disabled={xAvailable.length === 0}
           >
-            <option value="">+ Add param</option>
-            {specs
-              .filter((s) => !xSelected.has(s.key) && !ySelected.has(s.key))
-              .map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
+            <Select.Trigger className="axis-select" size="2" />
+            <Select.Content>
+              <Select.Item value="__add__" disabled>
+                {xAvailable.length === 0 ? 'All params used' : '+ Add param'}
+              </Select.Item>
+              {xAvailable.map((s) => (
+                <Select.Item key={s.key} value={s.key}>{s.label}</Select.Item>
               ))}
-            {xSelected.size + ySelected.size >= specs.length && (
-              <option value="" disabled>All params used</option>
-            )}
-          </select>
+            </Select.Content>
+          </Select.Root>
         </div>
         <div className="axis-block">
           <div className="axis-block-title">Axis Y</div>
@@ -87,45 +97,42 @@ export function AxisConfig({
             {yParamOrder.map((key) => (
               <span key={key} className="axis-tag">
                 {specs.find((s) => s.key === key)?.label || key}
-                <button type="button" className="axis-tag-remove" onClick={() => removeY(key)} aria-label="Remove">
+                <Button type="button" variant="ghost" color="gray" size="1" className="axis-tag-remove" onClick={() => removeY(key)} aria-label="Remove">
                   ×
-                </button>
+                </Button>
               </span>
             ))}
           </div>
-          <select
-            className="axis-select"
-            value=""
-            onChange={(e) => {
-              const k = e.target.value
-              if (k) addY(k)
-              e.target.value = ''
+          <Select.Root
+            value={addYValue ?? '__add__'}
+            onValueChange={(k) => {
+              if (k && k !== '__add__') addY(k)
+              setAddYValue(undefined)
             }}
+            disabled={yAvailable.length === 0}
           >
-            <option value="">+ Add param</option>
-            {specs
-              .filter((s) => !ySelected.has(s.key) && !xSelected.has(s.key))
-              .map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
+            <Select.Trigger className="axis-select" size="2" />
+            <Select.Content>
+              <Select.Item value="__add__" disabled>
+                {yAvailable.length === 0 ? 'All params used' : '+ Add param'}
+              </Select.Item>
+              {yAvailable.map((s) => (
+                <Select.Item key={s.key} value={s.key}>{s.label}</Select.Item>
               ))}
-          </select>
+            </Select.Content>
+          </Select.Root>
         </div>
       </div>
       <div className="axis-config-row axis-aggregator">
         <label className="axis-label">Aggregator</label>
-        <select
-          className="axis-select aggregator-select"
-          value={aggregator}
-          onChange={(e) => setAggregator(e.target.value)}
-        >
-          {AGGREGATORS.map((a) => (
-            <option key={a.value} value={a.value}>
-              {a.label}
-            </option>
-          ))}
-        </select>
+        <Select.Root value={aggregator} onValueChange={setAggregator} size="2">
+          <Select.Trigger className="aggregator-select" />
+          <Select.Content>
+            {AGGREGATORS.map((a) => (
+              <Select.Item key={a.value} value={a.value}>{a.label}</Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
       </div>
     </div>
   )

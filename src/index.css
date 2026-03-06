@@ -1032,6 +1032,14 @@ a {
   box-shadow: 0 0 0 1px var(--accent-purple-border);
 }
 
+.heatmap-max-level .heatmap-cell {
+  cursor: default;
+}
+
+.heatmap-max-level .heatmap-cell:hover {
+  transform: none;
+}
+
 .heatmap-cell:not(:empty) {
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
   font-weight: 600;

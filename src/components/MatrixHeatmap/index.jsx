@@ -84,9 +84,12 @@ export function MatrixHeatmap() {
     setNodeStack([])
   }, [])
 
+  const MAX_DRILL_LEVEL = 3
+
   const handleCellClick = useCallback(
     (xBucket, yBucket) => {
       const node = effectiveNode
+      if (node.level >= MAX_DRILL_LEVEL) return
       const next = drillDown(node, xBucket, yBucket, xTotal, yTotal)
       setNodeStack((prev) => [...prev, next])
     },
@@ -143,6 +146,7 @@ export function MatrixHeatmap() {
               cells={result.cells}
               aggregator={aggregator}
               onCellClick={handleCellClick}
+              canDrillDown={effectiveNode.level < MAX_DRILL_LEVEL}
               node={result.node}
               xAxisLabel={`X: ${xParamOrder.join(', ')}`}
               yAxisLabel={`Y: ${yParamOrder.join(', ')}`}

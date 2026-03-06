@@ -85,11 +85,16 @@ export function rankToBucket(rank, rangeStart, rangeEnd, size = MATRIX_SIZE) {
 
 /**
  * Get bucket range [start, end) for bucketIndex inside node range.
+ * Must be the inverse of rankToBucket: every rank R in [bStart, bEnd) has rankToBucket(R,...) === bucketIndex.
+ * Uses ceil so that when rangeSize < size we still get correct non-empty ranges for buckets that have data.
  */
 export function getBucketRange(rangeStart, rangeEnd, bucketIndex, size = MATRIX_SIZE) {
   const rangeSize = rangeEnd - rangeStart
-  const bStart = rangeStart + Math.floor((rangeSize * bucketIndex) / size)
-  const bEnd = rangeStart + Math.floor((rangeSize * (bucketIndex + 1)) / size)
+  if (rangeSize <= 0) return [rangeStart, rangeStart]
+  const bStart = rangeStart + Math.ceil((rangeSize * bucketIndex) / size)
+  let bEnd = rangeStart + Math.ceil((rangeSize * (bucketIndex + 1)) / size)
+  bEnd = Math.min(bEnd, rangeEnd)
+  if (bEnd <= bStart) return [bStart, bStart]
   return [bStart, bEnd]
 }
 
