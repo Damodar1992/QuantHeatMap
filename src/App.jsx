@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import { Button } from '@radix-ui/themes'
 import { MatrixHeatmap } from './components/MatrixHeatmap'
+import QuantPage from './pages/QuantPage'
 
 function App() {
+  const [page, setPage] = useState('matrix')
+
   return (
     <div className="app-shell">
       <header className="app-topbar">
@@ -9,14 +13,30 @@ function App() {
           <div className="brand-pill">Q</div>
           <span className="brand-title">QuantSandbox</span>
           <nav className="top-nav">
-            <Button variant="soft" highContrast className="nav-pill nav-pill-active" size="2">
+            <Button
+              variant="soft"
+              highContrast={page === 'matrix'}
+              className={`nav-pill ${page === 'matrix' ? 'nav-pill-active' : 'nav-pill-muted'}`}
+              size="2"
+              onClick={() => setPage('matrix')}
+            >
               Matrix Heatmap
+            </Button>
+            <Button
+              variant="soft"
+              highContrast={page === 'quant'}
+              className={`nav-pill ${page === 'quant' ? 'nav-pill-active' : 'nav-pill-muted'}`}
+              size="2"
+              onClick={() => setPage('quant')}
+            >
+              Quant
             </Button>
           </nav>
         </div>
       </header>
       <main className="app-main">
-        <MatrixHeatmap />
+        {page === 'matrix' && <MatrixHeatmap />}
+        {page === 'quant' && <QuantPage />}
       </main>
     </div>
   )

@@ -140,6 +140,15 @@ export function getParamValueRangesForRankRange(paramOrder, valuesMap, rankStart
 }
 
 /**
+ * Get param values for a single rank (inverse of computeRank).
+ * Returns object { [paramKey]: value }.
+ */
+export function getParamsFromRank(paramOrder, valuesMap, rank) {
+  const ranges = getParamValueRangesForRankRange(paramOrder, valuesMap, rank, rank + 1)
+  return Object.fromEntries(ranges.map((r) => [r.key, r.minValue]))
+}
+
+/**
  * Percentile (sorted array, 0..1).
  */
 function percentile(sorted, p) {
@@ -179,13 +188,30 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
   }
 
   const cellIndex = (x, y) => y * MATRIX_SIZE + x
-  let recordsInNode = 0
+  const MAX_RECORDS_IN_NODE = MATRIX_SIZE * MATRIX_SIZE
 
+  const nodeRecords = []
   for (const rec of records) {
     const rankX = computeRank(rec.params, xParamOrder, axisConfig.xValuesMap)
     const rankY = computeRank(rec.params, yParamOrder, axisConfig.yValuesMap)
     if (rankX < xRange[0] || rankX >= xRange[1] || rankY < yRange[0] || rankY >= yRange[1]) continue
-    recordsInNode++
+    nodeRecords.push(rec)
+  }
+
+  let workRecords = nodeRecords
+  if (nodeRecords.length > MAX_RECORDS_IN_NODE) {
+    const shuffled = [...nodeRecords]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    workRecords = shuffled.slice(0, MAX_RECORDS_IN_NODE)
+  }
+  const recordsInNode = workRecords.length
+
+  for (const rec of workRecords) {
+    const rankX = computeRank(rec.params, xParamOrder, axisConfig.xValuesMap)
+    const rankY = computeRank(rec.params, yParamOrder, axisConfig.yValuesMap)
     const xBucket = rankToBucket(rankX, xRange[0], xRange[1], MATRIX_SIZE)
     const yBucket = rankToBucket(rankY, yRange[0], yRange[1], MATRIX_SIZE)
     const cell = cells[cellIndex(xBucket, yBucket)]

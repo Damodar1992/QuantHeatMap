@@ -664,6 +664,42 @@ a {
   color: var(--text-tertiary);
 }
 
+.quant-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.quant-page-header {
+  margin-bottom: 4px;
+}
+
+.quant-page-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-secondary-light);
+}
+
+.quant-page-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.quant-page-content {
+  padding: 24px;
+  border-radius: 12px;
+  background: var(--bg-surface-darker);
+  border: 1px solid var(--border-subtle);
+}
+
+.quant-placeholder {
+  margin: 0;
+  color: var(--text-tertiary);
+}
+
 .matrix-config-section {
   padding: 12px 14px;
   border-radius: 12px;

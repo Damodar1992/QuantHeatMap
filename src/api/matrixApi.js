@@ -8,7 +8,7 @@ import {
   prepareAxis,
 } from '../lib/matrixEngine'
 import { parameterSpecs } from '../data/parameterSpecs'
-import { generateMockRecords } from '../data/mockRecords'
+import { generateMockRecords, generateRootRecordsGrid } from '../data/mockRecords'
 
 let cachedRecords = null
 let cacheAxisKey = null
@@ -67,7 +67,17 @@ export async function postMatrixBuild(body) {
     ? node
     : createRootNode(xTotal, yTotal)
 
-  const records = getRecords(axisConfig)
+  const records =
+    effectiveNode.level === 0
+      ? generateRootRecordsGrid(
+          xParamOrder,
+          yParamOrder,
+          axisConfig.xValuesMap,
+          axisConfig.yValuesMap,
+          xTotal,
+          yTotal
+        )
+      : getRecords(axisConfig)
   const result = buildMatrix(records, axisConfig, effectiveNode, aggregator)
   return result
 }
