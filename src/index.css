@@ -636,7 +636,8 @@ a {
   --heatmap-gap-px: 4px;
   --heatmap-max-inline: calc(100vw - 120px);
   --heatmap-max-block: calc(100vh - 220px);
-  --heatmap-side: min(1800px, max(600px, min(var(--heatmap-max-inline), var(--heatmap-max-block))));
+  --heatmap-base-side: min(1800px, max(600px, min(var(--heatmap-max-inline), var(--heatmap-max-block))));
+  --heatmap-side: min(2160px, calc(var(--heatmap-base-side) * 1.2));
   --heatmap-cell-px: calc((var(--heatmap-side) - 24 * var(--heatmap-gap-px)) / 25);
 }
 
@@ -795,51 +796,45 @@ a {
 .heatmap-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 2px 0;
   font-size: 13px;
-  color: var(--text-tertiary);
 }
 
-.breadcrumb-btn {
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border-medium);
-  background: transparent;
-  color: var(--text-secondary-light);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.breadcrumb-btn:hover {
-  background: var(--bg-overlay);
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
 }
 
 .breadcrumb-sep {
+  margin: 0 6px;
   color: var(--text-muted);
+  font-weight: 600;
+  user-select: none;
 }
 
-.breadcrumb-link {
-  padding: 0 4px;
+.breadcrumb-segment {
+  padding: 4px 0;
   border: none;
   background: none;
-  color: var(--text-secondary-light);
-  font-size: 13px;
   cursor: pointer;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  transition: color 0.15s;
 }
 
-.breadcrumb-link:hover {
-  color: var(--text-primary-light);
-  text-decoration: underline;
+.breadcrumb-segment:hover {
+  color: var(--text-secondary-light);
 }
 
-.breadcrumb-link-current {
-  font-weight: 600;
+.breadcrumb-segment-current {
+  color: var(--text-secondary-light);
+  font-weight: 500;
   cursor: default;
 }
 
-.breadcrumb-link-current:hover {
-  text-decoration: none;
+.breadcrumb-segment-current:hover {
+  color: var(--text-secondary-light);
 }
 
 .matrix-error {
@@ -858,6 +853,73 @@ a {
 .matrix-empty {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.matrix-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.matrix-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.json-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.json-modal {
+  background: var(--bg-surface-darker);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.json-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.json-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary-light);
+}
+
+.json-modal-content {
+  margin: 0;
+  padding: 20px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary-light);
+  white-space: pre-wrap;
+  word-break: break-all;
+  flex: 1;
+  min-height: 200px;
 }
 
 .matrix-content {
@@ -1047,20 +1109,45 @@ a {
 .heatmap-cell {
   min-width: 0;
   min-height: 0;
-  padding: 0;
+  padding: 2px;
   border: none;
   border-radius: 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  line-height: 1;
+  font-size: 10px;
+  line-height: 1.1;
   color: rgba(255, 255, 255, 0.95);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   overflow: hidden;
+}
+
+.heatmap-cell-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 0;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.heatmap-cell-score {
+  font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.heatmap-cell-count {
+  font-size: 0.9em;
+  opacity: 0.9;
+  font-weight: 500;
 }
 
 .heatmap-cell:hover {
@@ -1173,7 +1260,8 @@ a {
   color: var(--text-secondary-light);
 }
 
-.inspector-param-base {
+.inspector-param-base,
+.inspector-param-range {
   color: var(--text-muted);
 }
 

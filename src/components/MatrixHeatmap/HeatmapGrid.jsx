@@ -17,6 +17,12 @@ function formatParamRange(spec, minVal, maxVal) {
   return `${label}: ${minVal}-${maxVal}`
 }
 
+/** Number of distinct values for this param in [minVal, maxVal] from values array */
+function countValuesInRange(values, minVal, maxVal) {
+  if (!values || !values.length) return 0
+  return values.filter((v) => v >= minVal && v <= maxVal).length
+}
+
 export function HeatmapGrid({
   cells,
   aggregator,
@@ -105,6 +111,9 @@ export function HeatmapGrid({
     )
   }, [yRanges, yParamOrder, yValuesMap])
 
+  const totalAxisX = node?.xRange ? node.xRange.end - node.xRange.start : 0
+  const totalAxisY = node?.yRange ? node.yRange.end - node.yRange.start : 0
+
   return (
     <div className={`heatmap-wrap${canDrillDown ? '' : ' heatmap-max-level'}`}>
       <div className="heatmap-layout">
@@ -120,9 +129,19 @@ export function HeatmapGrid({
           <div className="heatmap-axis-ticks heatmap-axis-ticks-x">
               {xRanges.map((_, i) => {
                 const params = xParamRangesPerBucket[i] || []
+                const [start, end] = xRanges[i] || [0, 0]
+                const count = end - start
                 const title = [
-                  'Axis info X — param range',
-                  ...params.map((r) => formatParamRange(specByKey.get(r.key), r.minValue, r.maxValue)),
+                  '——— Axis X info ———',
+                  ...params.map((r) => {
+                    const spec = specByKey.get(r.key)
+                    const label = spec?.label || r.key
+                    const rangeStr = r.minValue === r.maxValue ? String(r.minValue) : `${r.minValue} .. ${r.maxValue}`
+                    const valCount = countValuesInRange(xValuesMap?.get(r.key), r.minValue, r.maxValue)
+                    return `${label}: [${rangeStr}] — ${valCount} знач.`
+                  }),
+                  `Комбинаций в колонке: ${count}`,
+                  `Всего по Axis X: ${totalAxisX} комбинаций`,
                 ].join('\n')
               return (
                 <div key={i} className="heatmap-axis-tick" title={title}>
@@ -135,9 +154,19 @@ export function HeatmapGrid({
         <div className="heatmap-axis-ticks heatmap-axis-ticks-y">
           {yRanges.map((_, i) => {
             const params = yParamRangesPerBucket[i] || []
+            const [start, end] = yRanges[i] || [0, 0]
+            const count = end - start
             const title = [
-              'Axis info Y — param range',
-              ...params.map((r) => formatParamRange(specByKey.get(r.key), r.minValue, r.maxValue)),
+              '——— Axis Y info ———',
+              ...params.map((r) => {
+                const spec = specByKey.get(r.key)
+                const label = spec?.label || r.key
+                const rangeStr = r.minValue === r.maxValue ? String(r.minValue) : `${r.minValue} .. ${r.maxValue}`
+                const valCount = countValuesInRange(yValuesMap?.get(r.key), r.minValue, r.maxValue)
+                return `${label}: [${rangeStr}] — ${valCount} знач.`
+              }),
+              `Комбинаций в строке: ${count}`,
+              `Всего по Axis Y: ${totalAxisY} комбинаций`,
             ].join('\n')
             return (
               <div key={i} className="heatmap-axis-tick" title={title}>
@@ -159,6 +188,9 @@ export function HeatmapGrid({
               const color = getColor(cell.value, cell.count)
               const xRankRange = xRanges[x]
               const yRankRange = yRanges[y]
+              const xRankCount = xRankRange ? xRankRange[1] - xRankRange[0] : 0
+              const yRankCount = yRankRange ? yRankRange[1] - yRankRange[0] : 0
+              const rankCombinations = xRankCount * yRankCount
               const xParamRanges =
                 xRankRange && xValuesMap && xParamOrder.length
                   ? getParamValueRangesForRankRange(
@@ -178,25 +210,43 @@ export function HeatmapGrid({
                     )
                   : []
               const titleLines = [
-                '——— Axis X (по параметрам) ———',
-                ...xParamRanges.map((r) =>
-                  formatParamRange(specByKey.get(r.key), r.minValue, r.maxValue)
-                ),
-                xRankRange ? `rank X: [${xRankRange[0]} .. ${xRankRange[1]})` : '',
-                '——— Axis Y (по параметрам) ———',
-                ...yParamRanges.map((r) =>
-                  formatParamRange(specByKey.get(r.key), r.minValue, r.maxValue)
-                ),
-                yRankRange ? `rank Y: [${yRankRange[0]} .. ${yRankRange[1]})` : '',
-                '————————————',
-                ...(cell.count > 0
+                '——— Axis X info ———',
+                ...(xParamRanges.length
                   ? [
-                      'Count: ' + cell.count,
-                      'Min score: ' + (cell.min ?? cell.max ?? 0).toFixed(4),
-                      'Avg score: ' + (cell.avg ?? cell.median ?? 0).toFixed(4),
-                      'Max score: ' + (cell.max ?? 0).toFixed(4),
+                      ...xParamRanges.map((r) => {
+                        const spec = specByKey.get(r.key)
+                        const label = spec?.label || r.key
+                        const rangeStr = r.minValue === r.maxValue ? String(r.minValue) : `${r.minValue} .. ${r.maxValue}`
+                        const valCount = countValuesInRange(xValuesMap?.get(r.key), r.minValue, r.maxValue)
+                        return `${label}: [${rangeStr}] — ${valCount} знач.`
+                      }),
+                      `Комбинаций в колонке: ${xRankCount}`,
+                      `Всего по Axis X: ${totalAxisX} комбинаций`,
                     ]
-                  : ['Count: 0', 'Min score: —', 'Avg score: —', 'Max score: —']),
+                  : ['—']),
+                '——— Axis Y info ———',
+                ...(yParamRanges.length
+                  ? [
+                      ...yParamRanges.map((r) => {
+                        const spec = specByKey.get(r.key)
+                        const label = spec?.label || r.key
+                        const rangeStr = r.minValue === r.maxValue ? String(r.minValue) : `${r.minValue} .. ${r.maxValue}`
+                        const valCount = countValuesInRange(yValuesMap?.get(r.key), r.minValue, r.maxValue)
+                        return `${label}: [${rangeStr}] — ${valCount} знач.`
+                      }),
+                      `Комбинаций в строке: ${yRankCount}`,
+                      `Всего по Axis Y: ${totalAxisY} комбинаций`,
+                    ]
+                  : ['—']),
+                '——— Total info ———',
+                `Комбинаций на нижнем уровне при клике: ${rankCombinations}`,
+                cell.count > 0
+                  ? [
+                      'Min Score: ' + (cell.min ?? 0).toFixed(3),
+                      'Avg Score: ' + (cell.avg ?? cell.median ?? 0).toFixed(3),
+                      'Max Score: ' + (cell.max ?? 0).toFixed(3),
+                    ].join('\n')
+                  : 'Min Score: —\nAvg Score: —\nMax Score: —',
               ].filter(Boolean)
               return (
                 <button
@@ -207,8 +257,13 @@ export function HeatmapGrid({
                   onClick={() => onCellClick(x, y)}
                   title={titleLines.join('\n')}
                 >
-                  {cell.count > 0 ? cell.value.toFixed(2) : null}
-              </button>
+                  {cell.count > 0 ? (
+                    <span className="heatmap-cell-inner">
+                      <span className="heatmap-cell-score">{cell.value.toFixed(3)}</span>
+                      <span className="heatmap-cell-count">{cell.count}</span>
+                    </span>
+                  ) : null}
+                </button>
             )
           })}
         </div>

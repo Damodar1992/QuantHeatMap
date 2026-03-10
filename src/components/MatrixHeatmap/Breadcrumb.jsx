@@ -1,26 +1,22 @@
-import { Button } from '@radix-ui/themes'
-
-export function Breadcrumb({ nodeStack, onGoToLevel, onReset }) {
+export function Breadcrumb({ nodeStack, onGoToLevel }) {
   return (
-    <div className="heatmap-breadcrumb">
-      <Button variant="soft" size="1" className="breadcrumb-btn" onClick={onReset}>
-        Reset
-      </Button>
-      <span className="breadcrumb-sep">|</span>
-      {nodeStack.map((node, i) => (
-        <span key={i} className="breadcrumb-item">
-          {i > 0 && <span className="breadcrumb-sep"> - </span>}
-          <Button
-            type="button"
-            variant="ghost"
-            size="1"
-            className={`breadcrumb-link ${i === nodeStack.length - 1 ? 'breadcrumb-link-current' : ''}`}
-            onClick={() => onGoToLevel(i)}
-          >
-            {i === 0 ? 'Root' : i === 1 ? 'Level 1' : `level ${node.level}`}
-          </Button>
-        </span>
-      ))}
-    </div>
+    <nav className="heatmap-breadcrumb" aria-label="Drill-down path">
+      {nodeStack.map((node, i) => {
+        const isCurrent = i === nodeStack.length - 1
+        const label = i === 0 ? 'Root' : i === 1 ? 'Level 1' : `level ${node.level}`
+        return (
+          <span key={i} className="breadcrumb-item">
+            {i > 0 && <span className="breadcrumb-sep" aria-hidden>›</span>}
+            <button
+              type="button"
+              className={`breadcrumb-segment ${isCurrent ? 'breadcrumb-segment-current' : ''}`}
+              onClick={() => onGoToLevel(i)}
+            >
+              {label}
+            </button>
+          </span>
+        )
+      })}
+    </nav>
   )
 }

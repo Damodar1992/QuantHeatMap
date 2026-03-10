@@ -148,6 +148,12 @@ export function getParamsFromRank(paramOrder, valuesMap, rank) {
   return Object.fromEntries(ranges.map((r) => [r.key, r.minValue]))
 }
 
+/** Round to 3 decimal places for score display/export */
+function round3(v) {
+  if (v == null || typeof v !== 'number') return v
+  return Math.round(v * 1000) / 1000
+}
+
 /**
  * Percentile (sorted array, 0..1).
  */
@@ -188,7 +194,6 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
   }
 
   const cellIndex = (x, y) => y * MATRIX_SIZE + x
-  const MAX_RECORDS_IN_NODE = MATRIX_SIZE * MATRIX_SIZE
 
   const nodeRecords = []
   for (const rec of records) {
@@ -197,19 +202,10 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
     if (rankX < xRange[0] || rankX >= xRange[1] || rankY < yRange[0] || rankY >= yRange[1]) continue
     nodeRecords.push(rec)
   }
+  const recordsInNode = nodeRecords.length
 
-  let workRecords = nodeRecords
-  if (nodeRecords.length > MAX_RECORDS_IN_NODE) {
-    const shuffled = [...nodeRecords]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    workRecords = shuffled.slice(0, MAX_RECORDS_IN_NODE)
-  }
-  const recordsInNode = workRecords.length
-
-  for (const rec of workRecords) {
+  // Count and aggregate from all records in node so Count = number of ranks in cell
+  for (const rec of nodeRecords) {
     const rankX = computeRank(rec.params, xParamOrder, axisConfig.xValuesMap)
     const rankY = computeRank(rec.params, yParamOrder, axisConfig.yValuesMap)
     const xBucket = rankToBucket(rankX, xRange[0], xRange[1], MATRIX_SIZE)
@@ -251,12 +247,12 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
       x,
       y,
       count,
-      min: min ?? 0,
-      max,
-      avg: avg ?? 0,
-      p95,
-      median,
-      value,
+      min: round3(min ?? 0),
+      max: round3(max ?? 0),
+      avg: round3(avg ?? 0),
+      p95: round3(p95 ?? 0),
+      median: round3(median ?? 0),
+      value: round3(value ?? 0),
     })),
     summary: {
       recordsInNode,

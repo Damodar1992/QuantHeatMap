@@ -1,5 +1,5 @@
 /**
- * Matrix Heatmap API. POST /api/matrix/build implemented locally (no backend).
+ * Matrix Heatmap API. Build uses data from Neon public.Heatmap via /api/db/heatmap/records.
  */
 
 import {
@@ -8,23 +8,28 @@ import {
   prepareAxis,
 } from '../lib/matrixEngine'
 import { parameterSpecs } from '../data/parameterSpecs'
-import { generateMockRecords, generateRootRecordsGrid } from '../data/mockRecords'
+import { generateMockRecords } from '../data/mockRecords'
 
-let cachedRecords = null
-let cacheAxisKey = null
+let cachedNeonRecords = null
 
-function getRecords(axisConfig) {
+async function getRecordsFromNeon() {
+  if (cachedNeonRecords) return cachedNeonRecords
+  const res = await fetch('/api/db/heatmap/records')
+  if (!res.ok) throw new Error('Neon Heatmap records failed: ' + res.status)
+  const data = await res.json()
+  if (!Array.isArray(data)) throw new Error('Invalid heatmap records response')
+  cachedNeonRecords = data
+  return cachedNeonRecords
+}
+
+function getRecordsMock(axisConfig) {
   const allKeys = [...(axisConfig.xParams || []), ...(axisConfig.yParams || [])]
-  const key = allKeys.sort().join('|')
-  if (cachedRecords && cacheAxisKey === key) return cachedRecords
-  cachedRecords = generateMockRecords(
+  return generateMockRecords(
     parameterSpecs,
     allKeys.length ? allKeys : ['MACD.fast', 'MACD.slow', 'BB.time', 'BB.devUp'],
     400000,
     true
   )
-  cacheAxisKey = key
-  return cachedRecords
 }
 
 function buildSpecsMap() {
@@ -67,17 +72,28 @@ export async function postMatrixBuild(body) {
     ? node
     : createRootNode(xTotal, yTotal)
 
-  const records =
-    effectiveNode.level === 0
-      ? generateRootRecordsGrid(
-          xParamOrder,
-          yParamOrder,
-          axisConfig.xValuesMap,
-          axisConfig.yValuesMap,
-          xTotal,
-          yTotal
-        )
-      : getRecords(axisConfig)
+  let records
+  try {
+    records = await getRecordsFromNeon()
+  } catch (err) {
+    records = getRecordsMock(axisConfig)
+  }
+
   const result = buildMatrix(records, axisConfig, effectiveNode, aggregator)
+
+  // Root: заполнить пустые ячейки одной синтетической записью (count=1, value=0.5)
+  if (effectiveNode.level === 0 && result.cells) {
+    const defaultScore = 0.5
+    for (const cell of result.cells) {
+      if (cell.count === 0) {
+        cell.count = 1
+        cell.min = defaultScore
+        cell.max = defaultScore
+        cell.avg = defaultScore
+        cell.value = defaultScore
+      }
+    }
+  }
+
   return result
 }
