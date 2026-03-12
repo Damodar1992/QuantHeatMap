@@ -204,7 +204,7 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
   }
   const recordsInNode = nodeRecords.length
 
-  // Count and aggregate from all records in node so Count = number of ranks in cell
+  // Count and aggregate; for each cell also count distinct child buckets (next level non-empty cells)
   for (const rec of nodeRecords) {
     const rankX = computeRank(rec.params, xParamOrder, axisConfig.xValuesMap)
     const rankY = computeRank(rec.params, yParamOrder, axisConfig.yValuesMap)
@@ -213,6 +213,17 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
     const cell = cells[cellIndex(xBucket, yBucket)]
     cell.count++
     cell.scores.push(rec.score)
+    const [xBStart, xBEnd] = getBucketRange(xRange[0], xRange[1], xBucket, MATRIX_SIZE)
+    const [yBStart, yBEnd] = getBucketRange(yRange[0], yRange[1], yBucket, MATRIX_SIZE)
+    const childXBucket = rankToBucket(rankX, xBStart, xBEnd, MATRIX_SIZE)
+    const childYBucket = rankToBucket(rankY, yBStart, yBEnd, MATRIX_SIZE)
+    if (!cell.childBucketKeys) cell.childBucketKeys = new Set()
+    cell.childBucketKeys.add(`${childXBucket},${childYBucket}`)
+  }
+
+  for (const cell of cells) {
+    cell.nextNonEmptyCells = cell.childBucketKeys ? cell.childBucketKeys.size : 0
+    delete cell.childBucketKeys
   }
 
   for (const cell of cells) {
@@ -243,10 +254,11 @@ export function buildMatrix(records, axisConfig, node, aggregator = 'MAX') {
       xRange: { start: node.xRange.start, end: node.xRange.end },
       yRange: { start: node.yRange.start, end: node.yRange.end },
     },
-    cells: cells.map(({ x, y, count, min, max, avg, p95, median, value }) => ({
+    cells: cells.map(({ x, y, count, min, max, avg, p95, median, value, nextNonEmptyCells }) => ({
       x,
       y,
       count,
+      nextNonEmptyCells: nextNonEmptyCells ?? 0,
       min: round3(min ?? 0),
       max: round3(max ?? 0),
       avg: round3(avg ?? 0),

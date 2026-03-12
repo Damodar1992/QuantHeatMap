@@ -183,7 +183,7 @@ export function HeatmapGrid({
               const x = i % MATRIX_SIZE
               const y = Math.floor(i / MATRIX_SIZE)
               const cell = cellMap.get(y * MATRIX_SIZE + x) || {
-                x, y, count: 0, min: 0, max: 0, avg: 0, p95: 0, median: 0, value: 0,
+                x, y, count: 0, nextNonEmptyCells: 0, min: 0, max: 0, avg: 0, p95: 0, median: 0, value: 0,
               }
               const color = getColor(cell.value, cell.count)
               const xRankRange = xRanges[x]
@@ -239,7 +239,8 @@ export function HeatmapGrid({
                     ]
                   : ['—']),
                 '——— Total info ———',
-                `Комбинаций на нижнем уровне при клике: ${rankCombinations}`,
+                `Непустых ячеек на следующем уровне: ${cell.nextNonEmptyCells ?? 0}`,
+                `Записей в ячейке: ${cell.count}`,
                 cell.count > 0
                   ? [
                       'Min Score: ' + (cell.min ?? 0).toFixed(3),
@@ -260,7 +261,7 @@ export function HeatmapGrid({
                   {cell.count > 0 ? (
                     <span className="heatmap-cell-inner">
                       <span className="heatmap-cell-score">{cell.value.toFixed(3)}</span>
-                      <span className="heatmap-cell-count">{cell.count}</span>
+                      <span className="heatmap-cell-count">{cell.nextNonEmptyCells ?? 0}</span>
                     </span>
                   ) : null}
                 </button>

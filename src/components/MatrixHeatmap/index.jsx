@@ -20,7 +20,7 @@ function buildSpecsMap() {
 export function MatrixHeatmap() {
   const [xParamOrder, setXParamOrder] = useState(defaultX)
   const [yParamOrder, setYParamOrder] = useState(defaultY)
-  const [aggregator, setAggregator] = useState('MAX')
+  const [aggregator, setAggregator] = useState('AVG')
   const [nodeStack, setNodeStack] = useState([])
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -180,13 +180,16 @@ export function MatrixHeatmap() {
             ? `Level ${node.level}`
             : 'Root'
     setJsonModalTitle(`Matrix data: ${levelLabel}`)
+    const nonEmptyCells = Array.isArray(displayed.cells)
+      ? displayed.cells.filter((c) => c && c.count > 0)
+      : []
     const payload = {
       axis: { xParamOrder, yParamOrder, aggregator },
       level: node?.level ?? 0,
       levelLabel,
       node,
       summary: displayed.summary,
-      cells: displayed.cells,
+      cells: nonEmptyCells,
       _note: 'Данные в этом JSON соответствуют тому, что отображается на тепловой карте для данного уровня.',
     }
     setJsonModalContent(JSON.stringify(payload, null, 2))

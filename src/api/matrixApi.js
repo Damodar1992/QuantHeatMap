@@ -5,6 +5,7 @@
 import {
   buildMatrix,
   createRootNode,
+  drillDown,
   prepareAxis,
 } from '../lib/matrixEngine'
 import { parameterSpecs } from '../data/parameterSpecs'
@@ -81,11 +82,25 @@ export async function postMatrixBuild(body) {
 
   const result = buildMatrix(records, axisConfig, effectiveNode, aggregator)
 
-  // Root: заполнить пустые ячейки одной синтетической записью (count=1, value=0.5)
+  // Root: для пустых ячеек выставить реальное nextNonEmptyCells (по дочернему узлу), затем синтетическое заполнение
   if (effectiveNode.level === 0 && result.cells) {
     const defaultScore = 0.5
     for (const cell of result.cells) {
       if (cell.count === 0) {
+        const childNode = drillDown(
+          effectiveNode,
+          cell.x,
+          cell.y,
+          xTotal,
+          yTotal
+        )
+        const childResult = buildMatrix(
+          records,
+          axisConfig,
+          childNode,
+          aggregator
+        )
+        cell.nextNonEmptyCells = childResult.summary.nonEmptyCells
         cell.count = 1
         cell.min = defaultScore
         cell.max = defaultScore
